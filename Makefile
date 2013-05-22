@@ -9,10 +9,14 @@ all: scmd verify sgverify
 
 snappy.o: snappy.c
 
-scmd: scmd.o snappy.o map.o util.o
+LIBSNAPPY_OBJS := snappy.o map.o util.o
+libsnappy.a: ${LIBSNAPPY_OBJS} 
+	 ar rcs libsnappy.a ${LIBSNAPPY_OBJS}
 
-CLEAN := scmd.o snappy.o scmd bench bench.o fuzzer.o fuzzer map.o verify.o \
-	 verify util.o sgverify sgverify.o
+scmd: scmd.o libsnappy.a
+
+CLEAN := ${LIBSNAPPY_OBJS} libsnappy.a scmd.o scmd bench bench.o fuzzer.o fuzzer verify.o \
+	 verify sgverify sgverify.o
 
 clean: 
 	rm -f ${CLEAN}
@@ -40,14 +44,14 @@ LDFLAGS += -lstdc++
 
 fuzzer.o: CFLAGS += -D COMP ${SNAPREF_FL}
 
-fuzzer: fuzzer.o map.o util.o snappy.o ${OTHER} # ${SNAPREF}
+fuzzer: fuzzer.o libsnappy.a ${OTHER} # ${SNAPREF}
 
-bench: bench.o map.o snappy.o util.o ${OTHER} # ${SNAPREF}
+bench: bench.o libsnappy.a ${OTHER} # ${SNAPREF}
 
 bench.o: CFLAGS += -I ../simple-pmu -D COMP # ${SNAPREF_FL}  # -D SIMPLE_PMU
 
-verify: verify.o map.o snappy.o util.o
+verify: verify.o libsnappy.a
 
-sgverify: sgverify.o map.o snappy.o util.o
+sgverify: sgverify.o libsnappy.a
 
 
