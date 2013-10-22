@@ -244,7 +244,7 @@ static inline const char *peek(struct source *s, size_t *len)
 {
 	if (likely(s->curvec < s->iovlen)) {
 		struct iovec *iv = &s->iov[s->curvec];
-		if (s->curoff < iv->iov_len) { 
+		if ((size_t)(s->curoff) < iv->iov_len) {
 			*len = iv->iov_len - s->curoff;
 			return n_bytes_after_addr(iv->iov_base, s->curoff);
 		}
@@ -257,8 +257,8 @@ static inline void skip(struct source *s, size_t n)
 {
 	struct iovec *iv = &s->iov[s->curvec];
 	s->curoff += n;
-	DCHECK_LE(s->curoff, iv->iov_len);
-	if (s->curoff >= iv->iov_len && s->curvec + 1 < s->iovlen) {
+	DCHECK_LE((size_t)(s->curoff), iv->iov_len);
+	if ((size_t)(s->curoff) >= iv->iov_len && s->curvec + 1 < s->iovlen) {
 		s->curoff = 0;
 		s->curvec++;
 	}
@@ -284,7 +284,7 @@ static inline void append(struct sink *s, const char *data, size_t n)
 	while ((n -= nlen) > 0) {
 		data += nlen;
 		s->curvec++;
-		DCHECK_LT(s->curvec, s->iovlen);
+		DCHECK_LT(s->curvec, (unsigned)(s->iovlen));
 		iov++;
 		nlen = min_t(size_t, iov->iov_len, n);
 		memcpy(iov->iov_base, data, nlen);
